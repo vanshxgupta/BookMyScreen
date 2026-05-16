@@ -1,22 +1,24 @@
-import { Route,Routes } from "react-router-dom"
+import { Route, Routes } from "react-router-dom";
+import Header from "./components/shared/Header.jsx";
+import Footer from "./components/shared/Footer.jsx";
+import Home from "./pages/Home.jsx";
 
 function App() {
-
   return (
     <>
-    <div className="flex flex-col min-h-screen">
-      <main className="flex-grow">
-        <Routes>
-          
-          <Route path="/" element={<h1>Home Page</h1>} />
-          <Route path="/profile/:id" element={<h1>Profile Page</h1>} />
-          <Route path="/movies" element={<h1>Movies Page</h1>} />
-
-        </Routes>
-      </main>
-    </div>
+      <div className="flex flex-col min-h-screen">
+        <Header />
+        <main className="flex-grow">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/profile/:id" element={<h1>Profile Page</h1>} />
+            <Route path="/movies" element={<h1>Movies Page</h1>} />
+          </Routes>
+        </main>
+        <Footer />
+      </div>
     </>
-  )
+  );
 }
 
-export default App
+export default App;

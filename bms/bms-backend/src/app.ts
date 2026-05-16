@@ -21,7 +21,7 @@ app.use(express.json());
 
 app.get("/", (_, res) => {
   res.json({
-    message: "Welcome to BookMyScreen API",
+    message: "Welcome to BookMySeat API",
   });
 });
 

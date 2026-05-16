@@ -1,5 +1,5 @@
 {
-  "name": "bookmyscreen",
+  "name": "bookmyseat",
   "version": "1.0.0",
   "description": "Movie Booking System",
   "main": "index.js",
@@ -10,7 +10,7 @@
     "seed:theaters": "ts-node src/scripts/seed-theaters.ts",
     "seed:movies": "ts-node src/scripts/seed-movies.ts"
   },
-  "author": "ProgrammingWithAmrit",
+  "author": "Vansh Gupta",
   "license": "ISC",
   "dependencies": {
     "cookie-parser": "^1.4.7",
