@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
+import router from "./routes/index";
 
 dotenv.config();
 
@@ -17,7 +18,8 @@ app.use(cookieParser());
 app.use(express.json());
 
 
-// Global error handler (MUST be after all routes)
+//all routes
+app.use("/api/v1",router);
 
 app.get("/", (_, res) => {
   res.json({
