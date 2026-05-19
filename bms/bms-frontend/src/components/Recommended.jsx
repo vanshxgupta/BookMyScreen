@@ -1,10 +1,12 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom';
-import { movies } from '../../utils/constants';
+import { movies } from '../utils/constants';
+
 
 const Recommended = () => {
-
     const navigate=useNavigate();
+
+    //api call
 
  return (
     <div className="w-full py-6 bg-white">

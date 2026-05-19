@@ -1,5 +1,5 @@
 import React from 'react'
-import { events } from '../../utils/constants';
+import { events } from '../utils/constants';
 
 const LiveEvents = () => {
   return (
