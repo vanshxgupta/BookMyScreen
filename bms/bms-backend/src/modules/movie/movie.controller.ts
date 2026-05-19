@@ -1,7 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 import * as MovieService from "./movie.service";
+import {MovieInput}  from "./movie.validation";
 
-export const createMovie=async(req: Request,res:Response,next:NextFunction) => {
+export const createMovie=async(req: Request<{},{},MovieInput>,res:Response,next:NextFunction) => {
     try {
         const movie=await MovieService.createMovie(req.body);
         res.status(200).json({movie});
