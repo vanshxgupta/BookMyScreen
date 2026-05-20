@@ -2,171 +2,143 @@ import React from "react";
 import { filters } from "../utils/constants";
 import TheatreTimings from "../components/movies/TheatreTimings";
 import m4 from "../assets/m4.avif";
+import { getMovieById } from "../apis";
+import { keepPreviousData } from "@tanstack/react-query";
+import { useParams } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 
 const MovieDetails = () => {
-  const movie = {
-    id: 4,
-    title: "F1: The Movie",
-    genre: ["Action", "Drama", "Sports"],
-    rating: 9.5,
-    votes: "6.8K",
-    img: m4,
-    languages: ["English", "Hindi", "Tamil", "Telugu"],
-    format: ["2D", "3D", "IMAX 3D"],
-    certification: "UA16+",
-    duration: "2h 24m",
-    releaseDate: "2023-09-15",
-    description: `F1: The Movie is a thrilling documentary that takes you behind the scenes of the high-octane world of Formula 1 racing. Directed by the acclaimed filmmaker, this movie offers an in-depth look at the 2023 Formula 1 season, showcasing the intense competition, cutting-edge technology, and the personal stories of the drivers and teams. With breathtaking footage from some of the most iconic circuits around the globe, F1: The Movie captures the speed, precision, and drama that define this exhilarating sport. Whether you're a die-hard F1 fan or new to the world of motorsport, this film promises an unforgettable cinematic experience that celebrates the passion and dedication of everyone involved in Formula 1.`,
-  };
+  const { movieid } = useParams();
+
+  //API CALL
+  const { data: movie, isError } = useQuery({
+    queryKey: ["movie", movieid],
+    queryFn: async () => {
+      const res= await getMovieById(movieid);
+      return res.data.movie;
+    },
+    placeholderData: keepPreviousData,
+  });
+  console.log(movie);
 
   return (
     <>
-      {/* Movie Details Section */}
+      {/* MovieDetails Section */}
       <div
         className="relative text-white font-sans px-4 py-10"
         style={{
-          backgroundImage: `url(${movie.img})`,
+          backgroundImage: `url(${movie?.posterUrl})`,
           backgroundSize: "cover",
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
         }}
       >
-        {/* Overlay */}
-        <div className="absolute inset-0 bg-black/70"></div>
-
-        {/* Content */}
+        {/* Overlay for darkness */}
+        <div className="absolute inset-0 bg-black opacity-70"></div>
+        {/* Actual Content */}
         <div className="relative z-10 max-w-7xl mx-auto flex flex-col lg:flex-row gap-10">
-          
           {/* Poster */}
           <div>
             <img
-              src={movie.img}
-              alt={movie.title}
-              className="rounded-xl w-56 shadow-2xl"
+              src={movie?.posterUrl}
+              alt={movie?.title}
+              className="rounded-xl w-52 shadow-xl"
             />
           </div>
-
-          {/* Movie Info */}
-          <div className="flex-1">
-            <h1 className="text-4xl font-bold mb-5">
-              {movie.title}
+          {/* Details */}
+          <div className="flex flex-col justify-start flex-1">
+            <h1 className="text-4xl font-bold mb-4">
+              {movie?.title}
             </h1>
 
-            {/* Rating */}
-            <div className="bg-[#2a2a2a] w-fit px-5 py-3 rounded-xl flex items-center gap-4 mb-5">
-              <span className="text-pink-500 font-bold text-lg">
-                ★ {movie.rating}
-              </span>
-
-              <span className="text-gray-300">
-                {movie.votes} Votes
-              </span>
-
-              <button
-                className="bg-[#444] px-4 py-2 rounded-lg text-sm
-                hover:bg-[#555] transition cursor-pointer"
-              >
-                Rate now
-              </button>
+            <div className="flex items-center gap-4 mb-3">
+              <div className="bg-[#3a3a3a] px-4 py-2 rounded-md flex items-center gap-2 text-sm">
+                <span className="text-pink-500 font-bold">
+                  ★ {movie?.rating}
+                </span>
+                <span className="text-gray-300">
+                  {movie?.votes} Votes
+                </span>
+                <button className="cursor-pointer bg-[#2f2f2f] ml-6 px-4 py-2 rounded-md  hove:bg-[#4a4a4a]">
+                  Rate now
+                </button>
+              </div>
             </div>
 
-            {/* Format & Languages */}
-            <div className="flex flex-wrap items-center gap-3 mb-5">
-              <span className="bg-[#2a2a2a] px-3 py-1 rounded-md text-sm">
-                {movie.format.join(", ")}
+            <div className="flex items-center gap-3 text-sm mb-4">
+              <span className="bg-[#3a3a3a] px-3 py-1 rounded">
+                {movie?.format?.join(", ")}
               </span>
-
-              <span className="bg-[#2a2a2a] px-3 py-1 rounded-md text-sm">
-                {movie.languages.join(", ")}
+              <span className="bg-[#3a3a3a] px-3 py-1 rounded">
+                {movie?.languages?.join(", ")}
               </span>
             </div>
 
-            {/* Meta Info */}
-            <p className="text-gray-300 text-sm mb-6">
-              {movie.duration} • {movie.genre.join(", ")} •{" "}
-              {movie.certification} • {movie.releaseDate}
+            <p className="text-sm text-gray-300 mb-4">
+              {movie?.duration} •{" "}
+              {movie?.genre?.join(", ")} •{" "}
+              {movie?.certification} •{" "}
+              {movie?.releaseDate}
             </p>
 
-            {/* About */}
             <div>
-              <h2 className="text-2xl font-semibold mb-3">
-                About the movie
-              </h2>
-
-              <p className="text-gray-200 leading-7 text-sm">
-                {movie.description}
+              <h2 className="text-xl font-bold mb-2">About the movie</h2>
+              <p className="text-sm text-gray-50 leading-relaxed mb-4">
+                {movie?.description}
               </p>
             </div>
           </div>
-
           {/* Share Button */}
-          <div className="absolute top-5 right-5">
+          <div className="absolute top-0 right-0 cursor-pointer">
             <button
-              className="bg-[#2a2a2a] px-4 py-2 rounded-lg
-              flex items-center gap-2 text-sm hover:bg-[#444]
-              transition cursor-pointer"
+              className="cursor-pointer bg-[#3a3a3a] px-4 py-2 rounded
+            text-sm flex items-center gap-2"
             >
-              <svg
-                className="w-4 h-4"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-              >
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M18 16.08c-.76 0-1.44.3-1.96.77l-7.13-4.21c.05-.25.09-.51.09-.78s-.03-.53-.09-.78l7.04-4.15c.54.5 1.25.81 2.05.81 1.66 0 3-1.34 3-3S19.66 2 18 2s-3 1.34-3 3c0 .27.04.52.09.78L7.91 9.93C7.38 9.43 6.67 9.12 5.87 9.12 4.21 9.12 2.87 10.46 2.87 12.12s1.34 3 3 3c.8 0 1.51-.31 2.04-.81l7.13 4.21c-.06.24-.1.49-.1.75 0 1.66 1.34 3 3 3s3-1.34 3-3-1.34-3-3-3z" />
               </svg>
-
               Share
             </button>
           </div>
         </div>
       </div>
 
-      {/* Show Timings Section */}
-      <div className="max-w-7xl mx-auto mt-8 px-4">
-        
+      {/* Show Timings */}
+
+      <div className="max-w-7xl mx-auto mt-8">
         {/* Filters */}
-        <div className="flex flex-wrap items-center gap-3 mb-4">
+        <div className="flex flex-wrap items-center gap-2 mb-2">
           {filters.map((filter, i) => (
             <button
+              className="border border-gray-300 px-5 py-1 rounded-lg
+                    cursor-pointer text-sm hover:bg-gray-100"
               key={i}
-              className="border border-gray-300 px-5 py-2 rounded-lg
-              text-sm hover:bg-gray-100 transition cursor-pointer"
             >
               {filter}
             </button>
           ))}
         </div>
 
-        <hr className="border-gray-300 mb-4" />
+        <hr className="my-2 border-gray-200" />
 
-        {/* Availability Status */}
-        <div
-          className="flex flex-wrap items-center gap-6 bg-gray-100
-          px-6 py-3 rounded-lg text-sm mb-6"
-        >
-          <span className="flex items-center gap-2">
-            <span className="w-2 h-2 bg-black rounded-full"></span>
-            <small className="text-gray-600 font-medium">
-              Available
-            </small>
+        {/* Avalability Status  */}
+        <div className="flex items-center gap-4 rounded-s-sm mb-1 py-2 text-sm px-8 bg-gray-200">
+          <span className="flex items-center gap-1">
+            <span className="w-2 h-2 mr-1 bg-black rounded-full inline-block"></span>
+            <small className="font-semibold text-gray-500">Available</small>
           </span>
-
-          <span className="flex items-center gap-2">
-            <span className="w-2 h-2 bg-yellow-400 rounded-full"></span>
-            <small className="text-gray-600 font-medium">
-              Filling Fast
-            </small>
+          <span className="flex items-center gap-1">
+            <span className="w-2 h-2 mr-1 font-semibold bg-yellow-400 rounded-full inline-block"></span>
+            <small className="font-semibold text-gray-500">Filling fast</small>
           </span>
-
-          <span className="flex items-center gap-2">
-            <span className="w-2 h-2 bg-red-500 rounded-full"></span>
-            <small className="text-gray-600 font-medium">
-              Almost Full
-            </small>
+          <span className="flex items-center gap-1">
+            <span className="w-2 h-2 mr-1 font-semibold bg-red-400 rounded-full inline-block"></span>
+            <small className="font-semibold text-gray-500"> Almost full</small>
           </span>
         </div>
 
-        {/* Theatre Timings */}
-        <TheatreTimings movieId={movie.id} />
+        {/* Theatres and Timings */}
+        <TheatreTimings movieId={movieid} />
       </div>
     </>
   );
