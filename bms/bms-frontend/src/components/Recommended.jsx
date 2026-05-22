@@ -48,7 +48,7 @@ const Recommended = () => {
           className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4
              xl:grid-cols-5 gap-4"
         >
-          {recMovies?.data.topmovies.map((movie, i) => (
+          {recMovies?.data?.topmovies?.map((movie, i) => (
             <div key={i}
              onClick={() => handleNavigate(movie)}
              className="rounded overflow-hidden cursor-pointer">
