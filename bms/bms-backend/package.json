@@ -9,7 +9,7 @@
     "start": "node dist/server.ts",
     "seed:movies": "ts-node src/scripts/seed-movies.ts",
     "seed:theatres": "ts-node src/scripts/seed-theatres.ts",
-    "seed:shows": "ts-node src/scripts/seed-shows.ts"
+    "seed:shows": "ts-node src/scripts/runShowSeeder.ts"
   },
   "author": "Vansh Gupta",
   "license": "ISC",
@@ -24,6 +24,7 @@
     "jsonwebtoken": "^9.0.2",
     "mailgen": "^2.0.29",
     "mongoose": "^8.16.1",
+    "node-cron": "^4.2.1",
     "nodemailer": "^7.0.4",
     "zod": "^3.25.67"
   },
@@ -33,6 +34,7 @@
     "@types/express": "^5.0.3",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^24.0.10",
+    "@types/node-cron": "^3.0.11",
     "@types/nodemailer": "^6.4.17",
     "nodemon": "^3.1.10",
     "ts-node": "^10.9.2",
