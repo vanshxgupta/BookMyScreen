@@ -1,68 +1,145 @@
-// Ye REAL automatic maintenance system hai.
-
 import cron from "node-cron";
 import dayjs from "dayjs";
 
 import { ShowModel }
 from "../modules/show/show.model";
 
-import { seedShowForDate } from "../scripts/components/seed-shows";
+import {
+  seedShowForDate
+} from "../scripts/components/seed-shows";
+
+
+
+export const runShowMaintenance =
+async () => {
+
+  try {
+
+    console.log(
+      "Running daily show cron..."
+    );
+
+    const today =
+      dayjs().startOf("day");
+
+
+
+    // DELETE EXPIRED SHOWS
+
+    const allShows =
+      await ShowModel.find({});
+
+    const expiredDates =
+      new Set<string>();
+
+    for (const show of allShows) {
+
+      const showDate =
+        dayjs(
+          show.date,
+          "DD-MM-YYYY"
+        ).startOf("day");
+
+      if (
+        showDate.isBefore(today)
+      ) {
+
+        expiredDates.add(show.date);
+      }
+    }
+
+    for (
+      const date
+      of expiredDates
+    ) {
+
+      await ShowModel.deleteMany({
+        date
+      });
+
+      console.log(
+        `Deleted ${date}`
+      );
+    }
+
+
+
+    // GET EXISTING DATES
+
+    const existingShows =
+      await ShowModel.distinct(
+        "date"
+      );
+
+    const existingDates =
+      new Set(existingShows);
+
+
+
+    // ENSURE NEXT 7 DAYS
+
+    for (
+      let i = 0;
+      i < 7;
+      i++
+    ) {
+
+      const futureDate =
+        today
+          .add(i, "day")
+          .format("DD-MM-YYYY");
+
+
+
+      // IF ANY SHOW EXISTS
+      // SKIP WHOLE DATE
+
+      if (
+        existingDates.has(
+          futureDate
+        )
+      ) {
+
+        continue;
+      }
+
+      await seedShowForDate(
+        dayjs(
+          futureDate,
+          "DD-MM-YYYY"
+        )
+      );
+
+      console.log(
+        `Added ${futureDate}`
+      );
+    }
+
+    console.log(
+      "Next 7 days synced"
+    );
+
+  } catch (err) {
+
+    console.log(err);
+  }
+};
+
+
 
 export const startShowCron = () => {
 
   cron.schedule(
-    
-    "0 0 * * *", // means every midnight
 
-    // "0 * * * *",// means every 1 hour 
+    "0 0 * * *", //runs every midnight
 
-    // "*/10 * * * *"// means every 10 minutes
+    // "*/1 * * * *", // for tsting , runs every minute 
 
-    async () => {
-
-      try {
-
-        console.log(
-          "Running daily show cron..."
-        );
-
-        const today =
-          dayjs().startOf("day");
-
-        // delete expired shows only
-        await ShowModel.deleteMany({
-          date: {
-            $lt: 
-            today.format("DD-MM-YYYY")
-            //means less than today
-          }
-        });
-
-        console.log(
-          "Expired shows deleted"
-        );
-
-        // add ONLY next future day
-        const futureDate =
-          today.add(6, "day");
-
-        await seedShowForDate(
-          futureDate
-        );
-
-        console.log(
-          "Next future day added"
-        );
-
-      } catch(err) {
-
-        console.log(err);
-      }
-
-    },
+    runShowMaintenance,
 
     {
       timezone: "Asia/Kolkata"
     }
   );
+
 };

@@ -71,8 +71,12 @@ export const seedShowForDate = async (
   const movies =
     await MovieModel.find({});
 
+  // console.log(movies.length);
+
   const theatres =
     await TheatreModel.find({});
+
+  // console.log(theatres.length);
 
   const formattedDate =
     showDate.format("DD-MM-YYYY");
@@ -133,7 +137,8 @@ export const seedShowForDate = async (
           seatLayout:
             generateSeatLayout(),
         });
-
+        
+        // console.log(formattedDate);
         await newShow.save();
       }
     }
