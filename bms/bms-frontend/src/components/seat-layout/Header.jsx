@@ -4,13 +4,13 @@ import { Navigate, useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import { FaUser } from "react-icons/fa";
-// import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/AuthContext";
 
 dayjs.extend(customParseFormat);
 
 const Header = ({ showData, type }) => {
   const navigate = useNavigate();
-//   const { auth, user, toggleModal } = useAuth();
+  const { auth, user, toggleModal } = useAuth();
   console.log(showData)
   return (
     <>
@@ -50,7 +50,7 @@ const Header = ({ showData, type }) => {
           )} 
 
 
-          {/* {auth ? (
+          {auth ? (
             <>
               <div className="flex items-center gap-6">
                 <span className="cursor-pointer text-sm font-medium border rounded-full border-gray-300 p-2">
@@ -72,7 +72,7 @@ const Header = ({ showData, type }) => {
             >
               Sign in
             </button>
-          )} */}
+          )}
         </div>
       </div>
       

@@ -1,14 +1,16 @@
 import React from "react";
 import mainLogo from "../../assets/main-icon.png";
-import { FaSearch } from "react-icons/fa";
+import { FaSearch, FaUser } from "react-icons/fa";
 import { Navigate } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { uselocation } from "../../context/LocationContext.jsx";
 import map from "../../assets/pin.gif";
+import SignInModel from "./SignInModel.jsx";
+import { useAuth } from "../../context/AuthContext.jsx";
 
 const Header = () => {
-
-  const {location,loading,error} = uselocation();
+  const { location, loading, error } = uselocation();
+  const { toggleModal, auth, user } = useAuth();
   const navigate = useNavigate();
 
   return (
@@ -37,16 +39,34 @@ const Header = () => {
           {/* Right Part */}
           <div className="flex item-center space-x-6">
             <div className="text-sm font-medium cursor-pointer mt-2">
-              {loading && <img src={map} alt="loading..." className="w-10 h-10" />}
+              {loading && (
+                <img src={map} alt="loading..." className="w-10 h-10" />
+              )}
               {location && <p>{location} &nbsp; ▼</p>}
             </div>
 
-            <button
-              className="bg-[#f84464] cursor-pointer
+            {auth ? (
+              <>
+                <span className="cursor-pointer text-sm font-medium border rounded-full border-gray-300 p-2">
+                  <FaUser className="text-gray-500" />
+                </span>
+                <span
+                  onClick={() => navigate(`/profile/${user?._id}`)}
+                  className="text-sm -ml-3 font-normal cursor-pointer hover:text-red-500"
+                >
+                  Hi, {user ? user?.name : "Test User"} &nbsp; ▼
+                </span>
+              </>
+            ) : (
+              <button
+                onClick={() => toggleModal()}
+                className="bg-[#f84464] cursor-pointer
                     text-white px-4 py-1.5 rounded text-sm"
-            >
-              Sign in
-            </button>
+              >
+                Sign in
+              </button>
+            )}
+
           </div>
         </div>
       </div>
@@ -77,6 +97,7 @@ const Header = () => {
           </div>
         </div>
       </div>
+      <SignInModel />
     </div>
   );
 };

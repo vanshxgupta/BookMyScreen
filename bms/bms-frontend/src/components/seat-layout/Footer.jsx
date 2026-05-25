@@ -2,13 +2,13 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 // import { useSeatContext } from "../../context/SeatContext";
 // import { socket } from "../../utils/socket";
-// import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/AuthContext";
 
 const Footer = () => {
   const navigate = useNavigate();
   const isSelected = false;
 //   const { setShows } = useSeatContext();
-//   const { user } = useAuth();
+  const { user } = useAuth();
 
   return (
     <>

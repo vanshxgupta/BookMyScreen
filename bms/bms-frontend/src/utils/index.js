@@ -22,7 +22,8 @@ export const seatTypePrices = {
 };
 
 export const getSeatType = (seatId) => {
-  const row = seatId?.charAt(0);
+  // const row = seatId?.charAt(0);
+  const row = seatId
   if (row === "E") return "PREMIUM";
   if (["B", "C", "D"].includes(row)) return "EXECUTIVE";
   if (row === "A") return "NORMAL";

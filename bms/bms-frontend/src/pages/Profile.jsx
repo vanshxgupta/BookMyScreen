@@ -1,21 +1,28 @@
-import React, { useEffect, useState } from "react";
+import React, { use, useEffect } from "react";
 import { tabs } from "../utils/constants";
 import { IoIosLogOut, IoMdAdd } from "react-icons/io";
 import { FiEdit } from "react-icons/fi";
-import BookingHistory from "../components/profile/BookingHistory.jsx";
+import BookingHistory from "../components/profile/BookingHistory";
+import { useAuth } from "../context/AuthContext";
+import { useParams } from "react-router-dom";
 
 const Profile = () => {
-  const [activeTab, setActiveTab] = useState("profile");
+
+  const { tab } = useParams();
+
+  useEffect(() => {
+    if(tab && tabs.includes(tab)) {
+      setActiveTab(tab);
+    }
+  },[tab])
+
+  const [activeTab, setActiveTab] = React.useState("profile");
+  const { user, logoutRequest } = useAuth();
 
   const handleLogout = () => {
-    console.log("Logout");
-  };
-
-  const user = {
-    name: "Vansh",
-    email: "vansh@gmail.com",
-    phone: "9876543210",
-  };
+    console.log("click")
+    logoutRequest();
+  }
 
   return (
     <>
@@ -23,8 +30,8 @@ const Profile = () => {
         <div className="max-w-7xl mx-auto flex flex-wrap gap-6 py-2 text-sm font-medium">
           {tabs.map((tab) => (
             <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
+                key={tab}
+                onClick={() => setActiveTab(tab)}
               className={`pb-1 cursor-pointer ${
                 activeTab === tab
                   ? "text-[#f74565]"
@@ -40,7 +47,7 @@ const Profile = () => {
       <div className="min-h-screen py-10 px-4 bg-gray-100">
         <div className="max-w-6xl mx-auto">
           {/* Profile Section */}
-          {activeTab === "Profile" && (
+          {activeTab === "profile" && (
             <>
               {/* Headers */}
               <div className="bg-gradient-to-r from-gray-800 to-[#f74565] rounded-t-md px-6 py-6 flex items-center gap-6 text-white">
@@ -49,10 +56,7 @@ const Profile = () => {
                 </div>
                 <div className="mt-2">
                   <h2 className="text-2xl font-bold">Hi, {user?.name}</h2>
-                  <small
-                    onClick={handleLogout}
-                    className="underline cursor-pointer"
-                  >
+                  <small onClick={handleLogout} className="underline cursor-pointer">
                     <IoIosLogOut size={20} className="inline" /> Logout
                   </small>
                 </div>
@@ -144,9 +148,9 @@ const Profile = () => {
               </div>
             </>
           )}
-          {/* 
-            Bookings Section */}
-          {activeTab === "Your Orders" && <BookingHistory />}
+
+            {/* Bookings Section */}
+            {activeTab === "booking" && <BookingHistory />}
         </div>
       </div>
     </>

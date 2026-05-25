@@ -5,12 +5,12 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { getShowsByMovieAndLocation } from "../../apis";
 import { uselocation } from "../../context/LocationContext";
 import { useNavigate } from "react-router-dom";
-// import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/AuthContext";
 
 const TheatreTimings = ({movieId}) => {
   const navigate = useNavigate();
   const { location } = uselocation();
-  // const { auth, toggleModal } = useAuth();
+  const { auth, toggleModal } = useAuth();
 
   const today = dayjs();
   const [selectedDate, setSelectedDate] = useState(today);
@@ -90,10 +90,10 @@ const TheatreTimings = ({movieId}) => {
                       return (
                         <button 
                         onClick={() => {
-                          // if(!auth){
-                          //   toggleModal();
-                          //   return;
-                          // }
+                          if(!auth){
+                            toggleModal();
+                            return;
+                          }
                           navigate(`/movies/${movieId}/${movieName}/${location}/theatre/${theatreId}/show/${slot._id}/seat-layout`)
                         }}
                         key={i} className="border cursor-pointer hover:bg-gray-100 border-gray-300 rounded-[16px] px-12 py-2 text-sm flex flex-col items-center justify-center">

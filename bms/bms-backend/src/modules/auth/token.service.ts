@@ -64,7 +64,7 @@ export const verifyRefreshToken=(token:string):ITokenPayload | JwtPayload=>{
 }
 
 
-//to find refresh token in database -> to check session is still alive or not
+//to find refresh token in database 
 export const findRefreshToken=async(userId:string,token:string): Promise<{userId:string,token:string} | null>=>{
     try{
         return await RefreshTokenModel.findOne({userId,token});

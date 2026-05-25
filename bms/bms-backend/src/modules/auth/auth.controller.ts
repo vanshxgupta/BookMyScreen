@@ -9,7 +9,6 @@ import { JwtPayload } from "jsonwebtoken";
 import { config } from "../../config/config";
 
 
-
 //send otp
 export const sendOtp = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -118,7 +117,7 @@ export const verifyOTP = async (req: Request, res: Response, next: NextFunction)
     })
 
     res.cookie('refreshToken', refreshToken, {
-        maxAge: 1000 * 60 * 60, // 1 hour
+        maxAge: 1000 * 60 * 60*24*7, // 7 day
         httpOnly: true,
         sameSite: 'none',
         secure: true
@@ -189,19 +188,20 @@ export const refreshToken = async (req: Request, res: Response, next: NextFuncti
     }
 
     // 6. Send new tokens to client in cookie;
-    res.cookie('accessToken', accessToken, {
-        maxAge: 1000 * 60 * 60 * 24 * 30,
-        httpOnly: true,
-        sameSite: 'none',
-        secure: true
-    });
+   res.cookie('accessToken', accessToken, {
+    maxAge: 1000 * 60 * 60, // 1 hour
+    httpOnly: true,
+    sameSite: 'none',
+    secure: true
+});
 
-    res.cookie('refreshToken', refreshToken, {
-        maxAge: 1000 * 60 * 60 * 24 * 30,
-        httpOnly: true,
-        sameSite: 'none',
-        secure: true
-    });
+res.cookie('refreshToken', refreshToken, {
+    maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+    httpOnly: true,
+    sameSite: 'none',
+    secure: true
+});
+
 
     res.json({auth: true}).status(200);
 
