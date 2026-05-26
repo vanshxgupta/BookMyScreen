@@ -8,6 +8,8 @@ import screenImg from "../assets/screen.png";
 import { uselocation } from '../context/LocationContext.jsx';
 import { useSeatContext } from '../context/SeatContext.jsx';
 
+import { socket } from '../utils/socket.js';
+
 const Seat = ({ seat, row, selectedSeats, lockedSeats , onClick }) => {
   const seatId = `${row}${seat.number}`;
   const isLocked = false;
