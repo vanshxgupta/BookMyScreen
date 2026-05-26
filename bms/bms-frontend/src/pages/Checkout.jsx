@@ -1,120 +1,161 @@
-import React from 'react'
-import Header from '../components/seat-layout/Header'
-import dayjs from 'dayjs'
-import { groupSeatsByType } from '../utils';
-import { calculateTotalPrice } from '../utils';
-import { FaInfoCircle } from 'react-icons/fa';
-import { BiSolidOffer } from 'react-icons/bi';
-import { CiUser, CiCircleQuestion } from 'react-icons/ci';
-import { uselocation } from '../context/LocationContext.jsx';
+import React, { useEffect, useState } from "react";
+import Header from "../components/seat-layout/Header";
+import dayjs from "dayjs";
+import { calculateTotalPrice, groupSeatsByType } from "../utils";
+import { FaInfoCircle } from "react-icons/fa";
+import { BiSolidOffer } from "react-icons/bi";
+import { CiCircleQuestion, CiUser } from "react-icons/ci";
+import { useAuth } from "../context/AuthContext";
+import { uselocation } from "../context/LocationContext";
+import { useSeatContext } from "../context/SeatContext";
+import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
+// import { razorPayScript } from "../utils/constants";
+// import { useMutation } from "@tanstack/react-query";
+// import { bookShow, createOrderRazorpay, verifyPaymentRazorpay } from "../apis/index";
+// import { socket  } from "../utils/socket";
 
-const Checkout = () => {
+function loadScript(src) {
+  return new Promise((resolve) => {
+    const script = document.createElement("script");
+    script.src = src;
 
-    //mock data 
-    const shows={
-        _id:"show123",
-        date:"23-05-2025",
-        startTime:"10:00 AM",
-        audioType:"2D",
-        theatre:{
-            name:"Cineplex",
-            city:"Mumbai",
-            state:"Maharashtra"
-        },
-        movie:{
-            title:"Avengers: Endgame",
-            certification:"U/A 13+",
-            language:["English", "Hindi"],
-            format:["2D","IMAX"],
-            posterUrl:"https://image.tmdb.org/t/p/w500/or06FN3Dka5tukK1e9sl16pB3iy.jpg"
-        },
-        theatre:{
-            name:"PVR Cinemas",
-            city:"Mumbai",
-            state:"Maharashtra"
-        }
+    script.onload = () => {
+      resolve(true);
     };
 
-    const selectedSeats = [
-        { number: "Gold",seatNumber:"B5", price: 250 },
-        { number: "Gold", seatNumber: "B6", price: 250 }
-    ];
+    script.onerror = () => {
+      resolve(false);
+    };
+
+    document.body.appendChild(script);
+  });
+}
+
+const Checkout = () => {
+  const navigate = useNavigate();
+
+  const { user } = useAuth();
+
+  const { location } = uselocation();
+
+  const { selectedSeats, shows: showData } = useSeatContext();
+
+  const { base, tax, total } = calculateTotalPrice(selectedSeats);
+
+  console.log(showData);
+
+  useEffect(() => {
+    if (!showData || selectedSeats.length === 0) {
+      navigate("/");
+    }
+  }, []);
+
+  const handleBookSeat = async () => {
+    try {
+      console.log("Booking Seats");
+
+      toast.success("Proceeding to payment");
+    } catch (error) {
+      console.log(error);
+      toast.error("Something went wrong");
+    }
+  };
 
   return (
-    <div className='min-h-screen w-full bg-white'>
-        <Header type="checkout" shows={{ data: shows }} />
+    <div className="min-h-screen w-full bg-white">
+      <Header type="checkout" />
+
+      <div className="max-w-6xl mx-auto px-4 py-6">
+        {/* <p className="text-red-500 text-center mb-3 text-lg border rounded-[14px] border-dashed py-2 font-semibold">
+          Time left: {String(Math.floor(timeLeft / 60)).padStart(2, "0")}:
+          {String(timeLeft % 60).padStart(2, "0")}
+        </p> */}
+
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Left Section */}
           <div className="flex-1 space-y-4">
             {/* Movie Details */}
             <div className="flex gap-4">
               <img
-                src={shows?.movie.posterUrl}
-                alt={shows?.movie.title}
+                src={showData?.movie.posterUrl}
+                alt={showData?.movie.title}
                 className="w-[60px] h-[90px] rounded object-cover"
               />
+
               <div>
                 <h3 className="font-semibold text-lg">
-                  {shows?.movie.title}
+                  {showData?.movie.title}
                 </h3>
+
                 <p className="text-sm text-gray-600">
-                  {shows?.movie.certification} •{" "}
-                  {shows?.movie.languages} •{" "}
-                  {shows?.movie.format}
+                  {showData?.movie.certification} •{" "}
+                  {showData?.movie.languages.join(", ")} •{" "}
+                  {showData?.format}
                 </p>
+
                 <p className="text-sm text-gray-600">
-                  {shows?.theatre.name}, {shows?.theatre.city},{" "}
-                  {shows?.theatre.state}
+                  {showData?.theatre.name}, {showData?.theatre.city},{" "}
+                  {showData?.theatre.state}
                 </p>
               </div>
             </div>
+
             {/* Show Details */}
             <div className="border border-gray-200 rounded-[24px] px-6 py-5">
               <p className="text-md font-medium border-b pb-5 border-gray-200">
-                {dayjs(shows?.date, "DD-MM-YYYY")
+                {dayjs(showData?.date, "DD-MM-YYYY")
                   .format("D MMMM YYYY")
                   .split(" ")
                   .slice(0, 2)
-                  }{" "}
+                  .join(" ")}{" "}
                 &nbsp;•{" "}
-                <span className="font-semibold">{shows?.startTime}</span>
+                <span className="font-semibold">
+                  {showData?.startTime}
+                </span>
               </p>
+
               <div className="flex items-center justify-between mt-4 mb-4">
                 <div>
                   <p className="text-md mt-2 font-semibold">
                     {selectedSeats.length} ticket
                   </p>
+
                   <div className="text-sm text-gray-500">
                     <span className="font-medium">
-                      {groupSeatsByType(selectedSeats) .map(
+                      {groupSeatsByType(selectedSeats).map(
                         ({ type, seats }) => (
                           <p key={type} className="font-medium">
-                            {type} - {seats}
+                            {type} - {seats.join(", ")}
                           </p>
-                        ),
+                        )
                       )}
                     </span>
                   </div>
                 </div>
+
                 <p className="text-md font-semibold mt-2">
                   <span className="text-gray-700">₹</span>
-                  123
+                  {base}
                 </p>
               </div>
             </div>
-{/* Cancellation Notice */}
+
+            {/* Cancellation Notice */}
             <div className="bg-white border rounde-[24px] border-gray-200 text-yellow-800 text-sm px-6 py-5 tracking-wide">
               <span className="font-medium flex items-center gap-2">
-                <FaInfoCircle size={24} /> No cancellation or refund available
-                after payment.
+                <FaInfoCircle size={24} />
+                No cancellation or refund available after payment.
               </span>
             </div>
 
             {/* Offers */}
             <div className="flex items-center justify-between border rounded-[24px] border-gray-200 px-6 py-5">
               <p className="font-medium text-sm flex items-center gap-2">
-                <BiSolidOffer size={20} /> Available Offers
+                <BiSolidOffer size={20} />
+                Available Offers
               </p>
+
               <p className="text-sm text-center text-blue-600 font-medium cursor-pointer">
                 View all offers
               </p>
@@ -126,52 +167,79 @@ const Checkout = () => {
             <h4 className="font-medium text-gray-900 text-lg">
               Payment Summary
             </h4>
+
             <div className="border border-gray-200 rounded-[24px] px-6 py-7 space-y-2">
               <div className="flex justify-between text-md">
-                <span className="text-sm text-gray-500">Order amount</span>
-                {/* <span>₹{base}</span> */}
+                <span className="text-sm text-gray-500">
+                  Order amount
+                </span>
+
+                <span>₹{base}</span>
               </div>
+
               <div className="flex justify-between text-md pb-4">
-                <span className="font-semibold text-sm">Taxes & fees (5%)</span>
-                {/* <span>₹{tax}</span> */}
+                <span className="font-semibold text-sm">
+                  Taxes & fees (5%)
+                </span>
+
+                <span>₹{tax}</span>
               </div>
+
               <div className="flex justify-between text-md font-semibold border-t border-gray-200 pt-4">
                 <span>To be paid</span>
-                {/* <span>₹{total}</span> */}
+
+                <span>₹{total}</span>
               </div>
             </div>
 
             {/* User details */}
-            {/* <h4 className="text-lg font-medium">Your details</h4>
+            <h4 className="text-lg font-medium">Your details</h4>
+
             <div className="border flex items-start gap-3 border-gray-200 rounded-[24px] px-6 py-7">
               <CiUser size={24} />
+
               <div className="-mt-1">
-                <p className="text-sm font-medium">{user.name}</p>
-                <p className="text-sm text-gray-600">+91-{user?.phone}</p>
-                <p className="text-sm text-gray-600">{user?.email}</p>
-                <p className="text-sm text-gray-600">{location}</p>
+                <p className="text-sm font-medium">{user?.name}</p>
+
+                <p className="text-sm text-gray-600">
+                  +91-{user?.phone}
+                </p>
+
+                <p className="text-sm text-gray-600">
+                  {user?.email}
+                </p>
+
+                <p className="text-sm text-gray-600">
+                  {location}
+                </p>
               </div>
-            </div> */}
+            </div>
 
             {/* Terms and button */}
             <div className="border border-gray-200 rounded-[24px] px-6 py-5">
               <p className="text-sm font-medium cursor-pointer flex items-center gap-2">
-                <CiCircleQuestion size={24} /> Terms and conditions
+                <CiCircleQuestion size={24} />
+                Terms and conditions
               </p>
             </div>
 
-            <div 
-            // onClick={handleBookSeat}
-             className="flex justify-between items-center bg-black rounded-[24px] px-6 py-4 cursor-pointer">
+            <div
+              onClick={handleBookSeat}
+              className="flex justify-between items-center bg-black rounded-[24px] px-6 py-4 cursor-pointer"
+            >
               <p className="text-white font-bold">
-                {/* ₹{total}  */}
+                ₹{total}{" "}
                 <span className="text-xs font-medium">TOTAL</span>
               </p>
-              <p className="text-white font-medium">Proceed To Pay</p>
+
+              <p className="text-white font-medium">
+                Proceed To Pay
+              </p>
             </div>
           </div>
         </div>
       </div>
+    </div>
   );
 };
 

@@ -4,6 +4,7 @@ import { BrowserRouter as Router } from "react-router-dom";
 import { LocationProvider } from "./context/LocationContext.jsx";
 import { QueryClientProvider,QueryClient } from "@tanstack/react-query";
 import { AuthProvider } from "./context/AuthContext.jsx";
+import { SeatContextProvider } from "./context/SeatContext.jsx";
 import "./index.css";
 import App from "./App.jsx";
 
@@ -22,7 +23,9 @@ createRoot(document.getElementById("root")).render(
       <QueryClientProvider client={queryClient}>
         <LocationProvider>
           <AuthProvider>
-          <App />
+            <SeatContextProvider>
+              <App />
+            </SeatContextProvider>
           </AuthProvider>
         </LocationProvider>
       </QueryClientProvider>

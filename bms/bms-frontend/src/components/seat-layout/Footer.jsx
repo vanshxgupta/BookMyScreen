@@ -1,25 +1,35 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-// import { useSeatContext } from "../../context/SeatContext";
+import { useSeatContext } from "../../context/SeatContext";
 // import { socket } from "../../utils/socket";
 import { useAuth } from "../../context/AuthContext";
 
-const Footer = () => {
+const Footer = ({isSelected,selectedSeats,showData,state}) => {
   const navigate = useNavigate();
-  const isSelected = false;
-//   const { setShows } = useSeatContext();
+  const { setShows } = useSeatContext();
   const { user } = useAuth();
+
+   const handleNavigateToCheckout = () => {
+    // // send lock request to socket.io server
+    // socket.emit("lock-seats", {
+    //   showId: showData._id,
+    //   seatIds: selectedSeats,
+    //   userId: user._id
+    // })
+
+    navigate(`/shows/${showData?.data?._id}/${state}/checkout`);
+    setShows(showData.data);
+  }
 
   return (
     <>
       {isSelected ? (
         <div className="bg-white py-3 px-6 flex items-center justify-between z-10">
-            {/* <p className="text-gray-700 font-medium text-base">
-                {selectedSeats.length} 
-                Seat{selectedSeats.length !== 1 ? 's' : ''} Selected
-            </p> */}
+            <p className="text-gray-700 font-medium text-base">
+                {selectedSeats.length} Seat{selectedSeats.length !== 1 ? 's' : ''} Selected
+            </p>
             <button
-            //  onClick={handleNavigateToCheckout} 
+             onClick={handleNavigateToCheckout} 
              className="bg-black cursor-pointer text-white px-6 py-2 rounded-lg font-semibold">
               Proceed
             </button>

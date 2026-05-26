@@ -6,32 +6,53 @@ import { useQuery , keepPreviousData } from '@tanstack/react-query';
 import { getShowById } from '../apis';
 import screenImg from "../assets/screen.png";
 import { uselocation } from '../context/LocationContext.jsx';
+import { useSeatContext } from '../context/SeatContext.jsx';
 
-
-const Seat = ({ seat, row}) => {
+const Seat = ({ seat, row, selectedSeats, lockedSeats , onClick }) => {
   const seatId = `${row}${seat.number}`;
-//   const isLocked = lockedSeats?.includes(seatId);
-//   const isSelected = selectedSeats.includes(seatId);
+  const isLocked = false;
+  const isSelected = selectedSeats.includes(seatId);
 
   return (
     <button
       className={`w-9 h-9 m-[2px] rounded-lg border text-sm
         ${
-           "hover:bg-gray-100 border-black cursor-pointer"
+          seat.status === "BOOKED"
+            ? "bg-gray-100 border-red-200 text-red-400 cursor-not-allowed"
+            : isLocked
+            ? "bg-gray-200 border-gray-300 text-gray-400 cursor-not-allowed"
+            : isSelected
+            ? "bg-[#6e52fa] text-white border-[#cec4f7] border-3 cursor-pointer"
+            : "hover:bg-gray-100 border-black cursor-pointer"
         }`}
-      disabled={seat.status === "occupied" }
-    //   onClick={onClick}
+      disabled={seat.status === "BOOKED" || isLocked}
+      onClick={onClick}
     >
-      {seat.status === "occupied" ? "X" : seat.number}
+      {seat.status === "BOOKED" || isLocked ? "X" : seat.number}
     </button>
   );
 };
 
-
 const SeatLayout = () => {
 
+    const {selectedSeats,setSelectedSeats}=useSeatContext();
     const { location } = uselocation();
+
+    const handleSelectSeat = (row, number) => {
+      const seatId = `${row}${number}`;
+      console.log(seatId);
+
+      setSelectedSeats((prev) => 
+        prev.includes(seatId) ? prev.filter((existingId) => existingId !== seatId) : [...prev, seatId]
+      // Toggles seat selection by adding the seat if not selected
+      // and removing it if the seat is already selected.
+      )
+      console.log(selectedSeats)
+    }
+
+
     const { showId } = useParams();
+
     const {
         data: showData,
         isLoading,
@@ -45,6 +66,8 @@ const SeatLayout = () => {
     });
 
     console.log(showData);
+
+    const isSelectedSeats = selectedSeats.length > 0;
 
     return (
     <>
@@ -85,9 +108,9 @@ const SeatLayout = () => {
                                 key={i}
                                 seat={seat}
                                 row={rowObj.row}
-                                // selectedSeats={selectedSeats}
+                                selectedSeats={selectedSeats}
                                 // lockedSeats={lockedSeats}
-                                // onClick={() => handleSelectSeat(rowObj.row, seat.number)}
+                                onClick={() => handleSelectSeat(rowObj.row, seat.number)}
                               />
                             ))}
                           </div>
@@ -111,7 +134,7 @@ const SeatLayout = () => {
 
         {/* Fixed Footer */}
         <div className="fixed bottom-0 left-0 w-full h-[100px] bg-white border-t border-gray-200 py-4 px-4 z-10">
-          <Footer />
+          <Footer isSelected={isSelectedSeats} selectedSeats={selectedSeats} showData={showData} state={location}  />
         </div>
       </div>
     </>
