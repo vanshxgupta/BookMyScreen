@@ -33,6 +33,36 @@ function loadScript(src) {
 }
 
 const Checkout = () => {
+
+  const [timeLeft, setTimeLeft] = useState(300); // 5 minutes = 300 seconds
+  useEffect(() => {
+
+    const interval = setInterval(() => {
+        setTimeLeft(prev => {
+          if(prev <= 1){
+            clearInterval(interval);
+
+            //send unlock seat event to backend 
+            socket.emit("unlock-seats", {
+              showId: showData._id,
+              userId: user._id
+            })
+
+            toast.error("Time expired!")
+            navigate("/");
+
+            return 0;
+          }
+          
+          return prev - 1;
+        })
+    }, 1000)
+
+    return () => clearInterval(interval) // cleanup
+
+  }, [])
+
+
   const navigate = useNavigate();
 
   const { user } = useAuth();
@@ -67,10 +97,10 @@ const Checkout = () => {
       <Header type="checkout" />
 
       <div className="max-w-6xl mx-auto px-4 py-6">
-        {/* <p className="text-red-500 text-center mb-3 text-lg border rounded-[14px] border-dashed py-2 font-semibold">
+        <p className="text-red-500 text-center mb-3 text-lg border rounded-[14px] border-dashed py-2 font-semibold">
           Time left: {String(Math.floor(timeLeft / 60)).padStart(2, "0")}:
           {String(timeLeft % 60).padStart(2, "0")}
-        </p> */}
+        </p>
 
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Left Section */}

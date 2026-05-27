@@ -1,6 +1,7 @@
 import app from "./app";
 import { config } from "./config/config";
 import connectDb from "./config/db";
+import { registerSocketHandlers } from "./socket/sockethandlers";
 
 import {
   startShowCron,
@@ -44,10 +45,9 @@ const startServer = async () => {
 // reconnect
 
 
-
     io.on("connection", (socket) => {
     console.log("✅ User connected: ", socket.id);
-    // registerSocketHandlers(socket, io);
+    registerSocketHandlers(socket, io);
 
     socket.on("disconnect", (reason) => {
       console.log("❌ User disconnected: ", socket.id, "Reason", reason);

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect ,useState} from 'react'
 import Header from '../components/seat-layout/Header.jsx';
 import Footer from '../components/seat-layout/Footer.jsx';
 import { useParams } from 'react-router-dom';
@@ -7,15 +7,16 @@ import { getShowById } from '../apis';
 import screenImg from "../assets/screen.png";
 import { uselocation } from '../context/LocationContext.jsx';
 import { useSeatContext } from '../context/SeatContext.jsx';
+import { useAuth } from '../context/AuthContext.jsx';
 
 import { socket } from '../utils/socket.js';
 
 const Seat = ({ seat, row, selectedSeats, lockedSeats , onClick }) => {
   const seatId = `${row}${seat.number}`;
-  const isLocked = false;
-  const isSelected = selectedSeats.includes(seatId);
+  const isLocked = lockedSeats?.includes(seatId);
+  const isSelected = selectedSeats?.includes(seatId);
 
-  return (
+   return (
     <button
       className={`w-9 h-9 m-[2px] rounded-lg border text-sm
         ${
@@ -36,7 +37,8 @@ const Seat = ({ seat, row, selectedSeats, lockedSeats , onClick }) => {
 };
 
 const SeatLayout = () => {
-
+    const { user } = useAuth();
+    const [lockedSeats, setLockedSeats] = useState(); 
     const {selectedSeats,setSelectedSeats}=useSeatContext();
     const { location } = uselocation();
 
@@ -45,10 +47,10 @@ const SeatLayout = () => {
       console.log(seatId);
 
       setSelectedSeats((prev) => 
-        prev.includes(seatId) ? prev.filter((existingId) => existingId !== seatId) : [...prev, seatId]
+      prev.includes(seatId) ? prev.filter((existingId) => existingId !== seatId) : [...prev, seatId])
       // Toggles seat selection by adding the seat if not selected
       // and removing it if the seat is already selected.
-      )
+  
       console.log(selectedSeats)
     }
 
@@ -67,9 +69,72 @@ const SeatLayout = () => {
         select: (res) => res.data,
     });
 
-    console.log(showData);
+    // console.log(showData);
 
     const isSelectedSeats = selectedSeats.length > 0;
+
+
+
+  // socket.io code start
+
+  useEffect(()=>{
+    setSelectedSeats([]);
+    // send show id to backend
+    socket.emit("join-show",{showId}); 
+    
+    //recieve the locked seats status from backend, to display it on frontend
+    socket.on("locked-seats-initials", ({seatIds}) => {
+      setLockedSeats(seatIds);
+    })
+
+
+    //Listen when new seats get locked
+    //This runs when ANY user successfully locks seats.
+    socket.on("seat-locked", ({seatIds, showId: incommingShowId, userId: lockingUserId}) => {
+      if(incommingShowId !== showId) return;
+
+      setLockedSeats((prev) => [...new Set([...prev, ...seatIds])]); // old +new locked seats 
+      
+
+      //this code is important , 
+      // suppose , one users selects E5, E6 , and user B selects ,E5,E7 , and user A PROCEEDS FIRST,
+      //  tooh E5,56 TOOH book ho jayegi , aur userB jo hai ,vo select nahi kr payega ,E5 ab ,
+      //  par user B E7 bhi proceed nahi kar payega kyunnki uske array mai abhi bhi E5 present 
+      // hai which is creating this issue that "Selected Seats are already selected " , but iss code ke baad esa nahi hoga 
+       //Remove seats only for OTHER users
+      if(user && lockingUserId !== user._id){
+        setSelectedSeats((prevSelected) =>
+          prevSelected.filter(
+            (seatId) => !seatIds.includes(seatId)
+          )
+        );
+      }
+
+    })
+
+    //Listen when seats get unlocked
+      socket.on("seat-unlocked", ({seatIds, showId:incommingShowId}) => {
+      if(incommingShowId !== showId) return;
+
+      setLockedSeats((prev) => prev.filter((id) => !seatIds.includes(id)));
+    })
+
+
+    //RACE CONDITIONS
+    //Suppose 2 users click same seat simultaneously -> then show the failed notification to one of the user 
+    socket.on("seat-locked-failed", ({
+      showId,
+      requested: seatIds,
+      alreadyLocked,}) => {
+      toast.error('Some seats are already locked')
+    })
+
+    }, [showId,user]); // runs everytime showid changes or user changes
+    
+    console.log("lockedSeats",lockedSeats);
+    
+    // socket.io code ends
+    
 
     return (
     <>
@@ -111,7 +176,7 @@ const SeatLayout = () => {
                                 seat={seat}
                                 row={rowObj.row}
                                 selectedSeats={selectedSeats}
-                                // lockedSeats={lockedSeats}
+                                lockedSeats={lockedSeats}
                                 onClick={() => handleSelectSeat(rowObj.row, seat.number)}
                               />
                             ))}

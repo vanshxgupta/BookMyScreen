@@ -1,8 +1,9 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useSeatContext } from "../../context/SeatContext";
-// import { socket } from "../../utils/socket";
+import { socket } from "../../utils/socket";
 import { useAuth } from "../../context/AuthContext";
+import {toast} from "react-hot-toast";
 
 const Footer = ({isSelected,selectedSeats,showData,state}) => {
   const navigate = useNavigate();
@@ -10,16 +11,26 @@ const Footer = ({isSelected,selectedSeats,showData,state}) => {
   const { user } = useAuth();
 
    const handleNavigateToCheckout = () => {
-    // // send lock request to socket.io server
-    // socket.emit("lock-seats", {
-    //   showId: showData._id,
-    //   seatIds: selectedSeats,
-    //   userId: user._id
-    // })
+    // send lock request to socket.io server
+    socket.emit("lock-seats", {
+      showId: showData?.data?._id,
+      seatIds: selectedSeats,
+      userId: user._id
+    },(response)=>{    // This is Socket.IO ACK callback.
 
-    navigate(`/shows/${showData?.data?._id}/${state}/checkout`);
-    setShows(showData.data);
-  }
+    // Only navigate if the backend confirms the lock was successful
+    if (response && response.success) {
+      navigate(`/shows/${showData?.data?._id}/${state}/checkout`);
+      setShows(showData.data);
+    }
+    else{
+      // The backend rejected it. 
+      // (Your existing toast in SeatLayout will handle the error message)
+      toast.error("Seats are already locked by someone else!");
+      console.log("Navigation prevented: Seats were already locked.");
+    }
+  });
+}
 
   return (
     <>

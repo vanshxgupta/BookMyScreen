@@ -18,7 +18,7 @@ const queryClient = new QueryClient({
 
 
 createRoot(document.getElementById("root")).render(
-  <StrictMode>
+  
     <Router>
       <QueryClientProvider client={queryClient}>
         <LocationProvider>
@@ -30,5 +30,4 @@ createRoot(document.getElementById("root")).render(
         </LocationProvider>
       </QueryClientProvider>
     </Router>
-  </StrictMode>,
 );
