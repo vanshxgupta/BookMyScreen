@@ -23,6 +23,11 @@ export const logout = () => axiosWrapper.post("/auth/logout");
 export const getUser = () => axiosWrapper.get("/users/me");
 
 
+// Payment Endpoints
+export const createOrderRazorpay = (data) => axiosWrapper.post("/payment/create-order", data);
+export const verifyPaymentRazorpay = (data) => axiosWrapper.post("/payment/verify-payment", data);
+
+
 //Interceptor 
 // When access token expires backend returns 401 Unauthorized
 // This interceptor - >Calls /auth/refresh-token ,Gets new tokens , Retries the original API request automatically

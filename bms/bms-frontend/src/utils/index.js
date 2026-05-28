@@ -22,14 +22,14 @@ export const seatTypePrices = {
 };
 
 export const getSeatType = (seatId) => {
-  // const row = seatId?.charAt(0);
-  const row = seatId
+  // Extract just the first letter (e.g., "D" from "D10")
+  const row = seatId?.charAt(0);
+  
   if (row === "E") return "PREMIUM";
   if (["B", "C", "D"].includes(row)) return "EXECUTIVE";
   if (row === "A") return "NORMAL";
   return "UNKNOWN";
 };
-
 export const groupSeatsByType = (seats) => {
   const grouped = {};
 

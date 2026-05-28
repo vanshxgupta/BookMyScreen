@@ -38,8 +38,8 @@ const Seat = ({ seat, row, selectedSeats, lockedSeats , onClick }) => {
 
 const SeatLayout = () => {
     const { user } = useAuth();
-    const [lockedSeats, setLockedSeats] = useState(); 
-    const {selectedSeats,setSelectedSeats}=useSeatContext();
+    const [lockedSeats, setLockedSeats] = useState([]); 
+    const {selectedSeats,setSelectedSeats}=useSeatContext([]);
     const { location } = uselocation();
 
     const handleSelectSeat = (row, number) => {

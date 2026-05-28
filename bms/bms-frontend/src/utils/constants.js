@@ -375,3 +375,6 @@ export const countryCodes = [
   { name: "Malaysia", code: "MY", dial_code: "+60" },
   // Add more if needed
 ];
+
+
+export const razorPayScript = "https://checkout.razorpay.com/v1/checkout.js";
