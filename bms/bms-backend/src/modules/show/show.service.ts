@@ -48,41 +48,63 @@ export const getShowById = async (showId: string) => {
 
 
 //4. update seat status
-
-// ShowModel.updateOne(
-//    FILTER,
-//    UPDATE,
-//    OPTIONS
-// )
-
 export const updateSeatStatus = async (
-  showId: string,
-  row: string,
-  seatNumber: number,
+  showId: mongoose.Types.ObjectId,
+  seats: string[],
   status: "AVAILABLE" | "BOOKED" | "BLOCKED",
-)=>{
-    return await ShowModel.updateOne(
+  session: ClientSession //Ensures all DB operations succeed or rollback together.
 
-    // FILTER -> Find the show document with the given showId and the matching seat row.
-    {
-        _id:new Types.ObjectId(showId), 
-        "seatLayout.row": row
-    },
-    
-   // UPDATE -> Update the status field of the matched seat inside the matched row.
-    {
-        $set: {
-            "seatLayout.$.seats.$[elem].status": status
-        }
-    },
-    // OPTIONS -> Use arrayFilters to find the specific seat whose number matches seatNumber.
-    {
-        arrayFilters: [
-            { "elem.number": seatNumber }
-        ]
-    })
+) => {
+  
+  //fetch the show document inside the transaction session
+  const show = await ShowModel.findById(showId).session(session);
+  if(!show) {
+    throw new Error(`Show not found!`)
+  }
+
+  // Parse each seat string like "A1" into row and number
+  const parsedSeats = seats.map((seat) => {
+    const row = seat.charAt(0);
+    const number = parseInt(seat.slice(1));
+    return { row, number };
+  });
+
+
+  // Update the seat layout based on the parsed seats
+
+  for(const parsedSeat of parsedSeats) {
+
+    //Find the row and seatnnumber in the mongodb dcoumnet of show
+   
+    // seatLayout = [{ row: "A", seats: [...] }, { row: "B", seats: [...] }]
+    const row = show.seatLayout.find((r) => r.row === parsedSeat.row);
+
+    if(!row) {
+      throw new Error(`Invalid seat row: ${parsedSeat.row}`);
+    }
+
+    // Inside the found row, search the seats array for matching seat number
+    // row.seats = [{ number: 1, status: "AVAILABLE" }, { number: 2, status: "AVAILABLE" }]
+    const seat = row.seats.find((s) => s.number === parsedSeat.number);
+
+    if(!seat) {
+      throw new Error(`Invalid seat number: ${parsedSeat.number} in row ${parsedSeat.row}`);
+    }
+
+    // Guard: prevent double booking — if already BOOKED, reject the whole transaction
+    if(seat.status === "BOOKED") {
+      throw new Error(`Seat ${parsedSeat.row}${parsedSeat.number} is already booked!`);
+    }
+
+    seat.status = status; // Update the seat status to BOOKED or BLOCKED
+
+  }
+
+  show.markModified("seatLayout"); // Inform Mongoose that seatLayout has been modified
+
+  await show.save({ session }); // Save the updated show document within the transaction session
+
 }
-
 
 // call:
 //show123,A,2,BOOKED

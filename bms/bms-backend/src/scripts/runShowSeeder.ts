@@ -11,7 +11,7 @@ from "../modules/show/show.model";
 import { seedShow } from "./components/seed-shows";
 
 mongoose
-  .connect(config.databaseUrl as string)
+  .connect(config.databaseReplicaSet as string)
 
   .then(async () => {
 

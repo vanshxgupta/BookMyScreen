@@ -19,9 +19,9 @@ const startServer = async () => {
 
   await connectDb();
 
-  // await runShowMaintenance();
+  await runShowMaintenance();
 
-  // startShowCron();
+  startShowCron();
 
 
   //create HTTP server from Express app

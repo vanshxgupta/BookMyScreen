@@ -14,10 +14,11 @@ const MovieFilters = () => {
         </div>
 
         <div className="flex flex-wrap gap-2">
-          {languages.map((lang, i) => (
+          {languages.map((lang) => (
             <span
+              key={lang}
               className="border border-gray-200 
-                    text-[#f74362] px-3 py-1 text-sm rounded hover:bg-gray-100 cursor-pointer"
+              text-[#f74362] px-3 py-1 text-sm rounded hover:bg-gray-100 cursor-pointer"
             >
               {lang}
             </span>

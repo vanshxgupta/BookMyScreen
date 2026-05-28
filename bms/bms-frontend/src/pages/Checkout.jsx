@@ -12,10 +12,9 @@ import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { razorPayScript } from "../utils/constants";
 import { useMutation } from "@tanstack/react-query";
-import { createOrderRazorpay, verifyPaymentRazorpay } from "../apis/index";
+import { bookShow, createOrderRazorpay, verifyPaymentRazorpay } from "../apis/index";
 import { socket  } from "../utils/socket";
 
-// Function to dynamically load an external JavaScript file
 function loadScript(src) {
   return new Promise((resolve) => {
     const script = document.createElement("script");
@@ -25,15 +24,16 @@ function loadScript(src) {
     };
     script.onerror = () => {
       resolve(false);
-    };
+    }
+
     document.body.appendChild(script);
-  });
+  })
 }
 
 const Checkout = () => {
   const [timeLeft, setTimeLeft] = useState(300); // 5 minutes = 300 seconds
-  
   useEffect(() => {
+
     const interval = setInterval(() => {
         setTimeLeft(prev => {
           if(prev <= 1){
@@ -42,19 +42,21 @@ const Checkout = () => {
             socket.emit("unlock-seats", {
               showId: showData._id,
               userId: user._id
-            });
+            })
 
-            toast.error("Time expired!");
+            toast.error("Time expired!")
             navigate("/");
 
             return 0;
           }
+          
           return prev - 1;
-        });
-    }, 1000);
+        })
+    }, 1000)
 
-    return () => clearInterval(interval); // cleanup
-  }, []);
+    return () => clearInterval(interval) // cleanup
+
+  }, [])
 
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -63,19 +65,22 @@ const Checkout = () => {
   const { base, tax, total } = calculateTotalPrice(selectedSeats);
 
   useEffect(() => {
-    console.log(showData);
+    console.log(showData)
     if (!showData || selectedSeats.length === 0) {
       navigate("/");
     }
   }, []);
+
 
   /* Payment Gateway Integration Start */
 
   const createOrderMutation = useMutation({
     mutationFn: (reqData) => createOrderRazorpay(reqData),
     onSuccess: (data) => {
+      
       const orderData = data?.data;
 
+      
       const options = {
         key: `${import.meta.env.VITE_RAZORPAY_API_KEY}`,
         amount: orderData?.amount,
@@ -87,8 +92,7 @@ const Checkout = () => {
           console.log(response);
           verifyPaymentMutation.mutate(response);
 
-          // ⚠️ COMMENTED OUT FOR NOW: Awaiting bookShow endpoint definitions
-          /*
+
           const reqData = {
             showId: showData._id,
             seats: selectedSeats,
@@ -99,11 +103,8 @@ const Checkout = () => {
               convenience: tax
             }
           }
+
           bookTicketMutation.mutate(reqData);
-          */
-          
-          // Temporary handling to let users know the transaction verification triggered successfully
-          toast.success("Payment authorized successfully!");
         },
         prefill: {
           name: user?.name,
@@ -115,24 +116,24 @@ const Checkout = () => {
 
       const rzp = new window.Razorpay(options);
       rzp.open();
+
+
     }, 
     onError : (err) => {
       console.log(err);
     }
-  });
+  })
 
   const verifyPaymentMutation = useMutation({
     mutationFn : (reqData) => verifyPaymentRazorpay(reqData),
     onSuccess: (data) => {
-      toast.success(data?.data.message);
+      toast.success(data?.data.message)
     },
     onError: (err) => {
       console.log(err);
     }
-  });
+  })
 
-  // ⚠️ COMMENTED OUT FOR NOW: ReferenceError check-stop handler
-  /*
   const bookTicketMutation = useMutation({
     mutationFn : (reqData) => bookShow(reqData),
     onSuccess: (data) => {
@@ -149,23 +150,23 @@ const Checkout = () => {
       console.log(err);
     }
   })
-  */
 
   const handleBookSeat = async () => {
       try {
         console.log(razorPayScript);
         const res = await loadScript(razorPayScript);
-        console.log(res);
+        console.log(res)
         if(!res) {
           toast.error("Razorpay SDK failed to load. Are you online?", {
-            variant: "warning",
+          variant: "warning",
           });
           return;
         }
 
         const reqData = {
           amount : total
-        };
+        }
+
 
         // Call the API to create the order
         createOrderMutation.mutate(reqData);
@@ -174,9 +175,12 @@ const Checkout = () => {
         console.log(error);
         toast.error(error);
       }
-  };
+  }
+
 
   /* Payment Gateway Integration End */
+
+
 
   return (
     <div className="min-h-screen w-full bg-white">
@@ -207,8 +211,8 @@ const Checkout = () => {
                   {showData?.movie.format.join(", ")}
                 </p>
                 <p className="text-sm text-gray-600">
-                  {showData?.theatre.name}, {showData?.theatre.city},{" "}
-                  {showData?.theatre.state}
+                  {showData?.theatre?.name}, {showData?.theatre?.city},{" "}
+                  {showData?.theatre?.state}
                 </p>
               </div>
             </div>
@@ -248,7 +252,7 @@ const Checkout = () => {
             </div>
 
             {/* Cancellation Notice */}
-            <div className="bg-white border rounded-[24px] border-gray-200 text-yellow-800 text-sm px-6 py-5 tracking-wide">
+            <div className="bg-white border rounde-[24px] border-gray-200 text-yellow-800 text-sm px-6 py-5 tracking-wide">
               <span className="font-medium flex items-center gap-2">
                 <FaInfoCircle size={24} /> No cancellation or refund available
                 after payment.

@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  mongo:
+    image: mongo:6
+
+    # Enable replica set for transactions
+    command: --replSet rs0 --bind_ip_all
+
+    # Expose MongoDB port
+    ports:
+      - "27017:27017"
+
+    # Check if MongoDB is running
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 10s
+      retries: 5 
+
+    
+  mongo-init:
+    image: mongo:6
+
+    # Wait until mongo becomes healthy
+    depends_on:
+      mongo:
+        condition: service_healthy
+
+    # Initialize replica set
+    command: >
+      mongosh --host mongo:27017 --eval
+      'rs.initiate({_id:"rs0",members:[{_id:0,host:"mongo:27017"}]})'

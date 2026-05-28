@@ -14,7 +14,7 @@ declare global {
 }
 
 interface TokenPayload extends JwtPayload{
-    id: string;
+    _id: string;
 }
 
 export const isVerifiedUser = async (req: Request, res: Response, next: NextFunction) => {

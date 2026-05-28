@@ -41,18 +41,18 @@ export const getShowById=async(req:Request,res:Response,next:NextFunction)=>{
     }
 };
 
-export const updateSeatStatus=async(req:Request,res:Response,next:NextFunction)=>{
-    try{
-        const showId=req.params.showId;
-        const {row,seatNumber,status}=req.query;
+// export const updateSeatStatus=async(req:Request,res:Response,next:NextFunction)=>{
+//     try{
+//         const showId=req.params.showId;
+//         const {row,seatNumber,status}=req.query;
 
-        const updatedShow=await ShowService.updateSeatStatus(showId as string,row as string,Number(seatNumber),status as "AVAILABLE" | "BOOKED" | "BLOCKED");
-        res.status(200).json({
-            message:"Seat status updated successfully",
-            data:updatedShow
-        });
-    }
-    catch(error){
-        next(error);
-    }
-};
+//         const updatedShow=await ShowService.updateSeatStatus(showId as string,row as string,Number(seatNumber),status as "AVAILABLE" | "BOOKED" | "BLOCKED");
+//         res.status(200).json({
+//             message:"Seat status updated successfully",
+//             data:updatedShow
+//         });
+//     }
+//     catch(error){
+//         next(error);
+//     }
+// };

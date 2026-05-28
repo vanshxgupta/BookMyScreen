@@ -28,6 +28,12 @@ export const createOrderRazorpay = (data) => axiosWrapper.post("/payment/create-
 export const verifyPaymentRazorpay = (data) => axiosWrapper.post("/payment/verify-payment", data);
 
 
+// Booking Endpoints
+export const bookShow = (data)=>axiosWrapper.post("/book",data)
+export const getUserBookings = () => axiosWrapper.get("/book");
+
+
+
 //Interceptor 
 // When access token expires backend returns 401 Unauthorized
 // This interceptor - >Calls /auth/refresh-token ,Gets new tokens , Retries the original API request automatically
