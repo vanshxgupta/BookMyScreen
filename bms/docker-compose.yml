@@ -1,33 +1,96 @@
-version: '3.8'
-
 services:
+
   mongo:
-    image: mongo:6
+    image: mongo:6                    
+    container_name: bms-mongo         
+    restart: always                   # Restart automatically if crashed
 
-    # Enable replica set for transactions
-    command: --replSet rs0 --bind_ip_all
-
-    # Expose MongoDB port
+    command: >
+      mongod --replSet rs0 --bind_ip_all   
+    # Enable replica set and allow connections from other containers
+    
     ports:
-      - "27017:27017"
+      - "27017:27017"                
+    #HOST MACHINE PORT : CONTAINER PORT
+    volumes:
+      - mongo_data:/data/db           # Persist database data
 
-    # Check if MongoDB is running
     healthcheck:
       test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
-      interval: 10s
-      timeout: 10s
-      retries: 5 
+      interval: 10s                   # Run healthcheck every 10 sec
+      timeout: 10s                    
+      retries: 5                     
 
-    
+    networks:
+      - bms-network                   # Connect to application network
+
   mongo-init:
-    image: mongo:6
+    image: mongo:6                    # Temporary container for replica set setup
 
-    # Wait until mongo becomes healthy
     depends_on:
       mongo:
-        condition: service_healthy
+        condition: service_healthy   
 
-    # Initialize replica set
+    restart: "no"                     # Run only once
+
     command: >
-      mongosh --host mongo:27017 --eval
-      'rs.initiate({_id:"rs0",members:[{_id:0,host:"mongo:27017"}]})'
+      bash -c "
+        sleep 5 &&
+        mongosh --host mongo:27017 --eval '
+          try {
+            rs.status()
+          } catch (e) {
+            rs.initiate({
+              _id: \"rs0\",
+              members: [{ _id: 0, host: \"mongo:27017\" }]
+            })
+          }
+        '
+      "
+    networks:
+      - bms-network
+
+  redis:
+    image: redis:7-alpine             
+    container_name: bms-redis
+    restart: always
+
+    ports:
+      - "6379:6379"                   
+
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]  
+      interval: 10s
+      timeout: 10s
+      retries: 5
+
+    networks:
+      - bms-network
+
+  backend:
+    image: vanshxgupta/bms-backend:v1   # Backend image from Docker Hub
+    container_name: bms-backend
+    restart: always
+
+    ports:
+      - "9000:9000"                   # Backend API port
+
+    env_file:
+      - ./bms-backend/.env            # Load environment variables
+
+    depends_on:
+      mongo-init:
+        condition: service_completed_successfully   # Wait for replica set initialization
+
+      redis:
+        condition: service_started     # Wait for Redis startup
+
+    networks:
+      - bms-network
+
+volumes:
+  mongo_data:                          # Named volume for MongoDB persistence
+
+networks:
+  bms-network:
+    driver: bridge                     # Internal Docker network

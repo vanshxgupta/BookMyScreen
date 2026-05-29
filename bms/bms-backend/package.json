@@ -6,10 +6,16 @@
   "scripts": {
     "dev": "nodemon",
     "build": "tsc",
+    "docker:build": "docker build --platform linux/amd64 -t vanshxgupta/bms-backend:v1 .",
+    "docker:push": "docker push vanshxgupta/bms-backend:v1",
+    "docker:publish": "npm run docker:build && npm run docker:push",
     "start": "node dist/server.ts",
     "seed:movies": "ts-node src/scripts/seed-movies.ts",
     "seed:theatres": "ts-node src/scripts/seed-theatres.ts",
-    "seed:shows": "ts-node src/scripts/runShowSeeder.ts"
+    "seed:shows": "ts-node src/scripts/runShowSeeder.ts",
+    "seed1": "node dist/scripts/seed-movies.js",
+    "seed2": "node dist/scripts/seed-theatres.js",
+    "seed3": "node dist/scripts/runShowSeeder.js"
   },
   "author": "Vansh Gupta",
   "license": "ISC",
