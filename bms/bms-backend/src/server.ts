@@ -19,18 +19,13 @@ const startServer = async () => {
 
   await connectDb();
 
-  await runShowMaintenance();
-
-  startShowCron();
-
-
   //create HTTP server from Express app
   const httpServer=http.createServer(app);
 
   //Create socket.io server
   const io =new Server(httpServer,{
     cors:{
-      origin: [process.env.FRONTEND_URL as string, "http://localhost:5173"],
+      origin:[process.env.FRONTEND_URL as string, "http://localhost:5173"],
       methods: ["GET", "POST"],
       credentials: true,
     },
@@ -62,6 +57,17 @@ const startServer = async () => {
     );
 
   });
+
+  // Run show seeding/cleanup in the background AFTER the server is already
+  // accepting traffic, so a restart never makes the whole site unreachable
+  // while this (potentially slow) job runs.
+  runShowMaintenance()
+    .then(() => {
+      startShowCron();
+    })
+    .catch((err) => {
+      console.log("Show maintenance failed to run on startup:", err);
+    });
 
 };
 
