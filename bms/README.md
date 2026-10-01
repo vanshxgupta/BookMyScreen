@@ -695,27 +695,8 @@ Real-Time Synchronization
 Confirmed Booking
 ```
 
-The key architectural decision is to treat **temporary seat availability** and **permanent booking state** as separate concerns.
-
----
-
-# 📚 Detailed Documentation
-
-For detailed implementation-level sequence diagrams and edge cases:
-
-- `docs/booking-flow.md`
-- `docs/authentication.md`
-- `docs/architecture.md`
-
----
-
-# 👨‍💻 Author
-
+# 👨‍💻 Developer
 **Vansh Gupta**
-
-B.Tech — Electrical Engineering  
-Maulana Azad National Institute of Technology, Bhopal
-
 ---
 
 ⭐ If you find the project useful, consider giving the repository a star.
