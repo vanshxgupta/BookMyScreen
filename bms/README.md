@@ -488,54 +488,6 @@ flowchart TD
 
 ---
 
-# ⚠️ Known Limitations
-
-## 1. Redis TTL Expiry Is Silent
-
-When a seat lock expires after 300 seconds, Redis automatically removes the key, but the current implementation does not emit a Socket.IO event.
-
-**Possible improvement:** Redis keyspace notifications or a dedicated expiration/reconciliation mechanism.
-
-## 2. Socket.IO Reconnection
-
-After a network disconnect, Socket.IO can reconnect using a new socket, but the current client does not automatically rejoin the previous show room.
-
-**Possible improvement:** Store the active `showId` and re-emit `join-show(showId)` after reconnection.
-
-## 3. Payment Succeeds but Booking Fails
-
-A payment can be captured while the subsequent booking transaction fails. The current implementation does not have an automated refund or reconciliation workflow.
-
-```mermaid
-flowchart TD
-    A[Payment Captured]
-    B[Create Booking]
-    C{Booking Successful?}
-    D[Confirm Booking]
-    E[Refund Payment]
-    F[Reconciliation Queue]
-
-    A --> B
-    B --> C
-    C -->|Yes| D
-    C -->|No| E
-    E --> F
-```
-
-## 4. Logout and Access Token Lifetime
-
-Logout invalidates the refresh token and clears cookies, but an already-issued access token can remain valid until expiry.
-
-## 5. Payment Verification Error Handling
-
-The current implementation has a missing `return` after a failed payment verification response, which can result in:
-
-```text
-Error: Cannot set headers after they are sent to the client
-```
-
----
-
 # 🛠️ Tech Stack
 
 ## Frontend
